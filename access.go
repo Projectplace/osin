@@ -330,10 +330,6 @@ func (s *Server) handleRefreshTokenRequest(w *Response, r *http.Request) *Access
 		w.SetError(E_UNAUTHORIZED_CLIENT, "")
 		return nil
 	}
-	if ret.AccessData.Client.GetRedirectUri() == "" {
-		w.SetError(E_UNAUTHORIZED_CLIENT, "")
-		return nil
-	}
 
 	// client must be the same as the previous token
 	if ret.AccessData.Client.GetId() != ret.Client.GetId() {
@@ -344,7 +340,6 @@ func (s *Server) handleRefreshTokenRequest(w *Response, r *http.Request) *Access
 	}
 
 	// set rest of data
-	ret.RedirectUri = ret.AccessData.RedirectUri
 	ret.UserData = ret.AccessData.UserData
 	if ret.Scope == "" {
 		ret.Scope = ret.AccessData.Scope
@@ -387,9 +382,6 @@ func (s *Server) handlePasswordRequest(w *Response, r *http.Request) *AccessRequ
 	if ret.Client = getClient(auth, w.Storage, w); ret.Client == nil {
 		return nil
 	}
-
-	// set redirect uri
-	ret.RedirectUri = FirstUri(ret.Client.GetRedirectUri(), s.Config.RedirectUriSeparator)
 
 	return ret
 }
@@ -550,9 +542,5 @@ func getClient(auth *BasicAuth, storage Storage, w *Response) Client {
 		return nil
 	}
 
-	if client.GetRedirectUri() == "" {
-		w.SetError(E_UNAUTHORIZED_CLIENT, "")
-		return nil
-	}
 	return client
 }
